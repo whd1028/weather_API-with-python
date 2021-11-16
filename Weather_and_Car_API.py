@@ -27,11 +27,14 @@ print(urlResponseInfo[["항목명(국문)","항목명(영문)","항목구분"]])
 
 file = open("OpenAPI_Project\LocationCode.txt",'r',encoding='utf-8')
 LoCode_File = file.read()
-LoCode_File.replace("\n\n",",").replace("\n","").replace(" ","").split(",")
+LoCode_File = LoCode_File.replace("\n\n",",")
+LoCode_File = LoCode_File.replace("\n","")
+LoCode_File = LoCode_File.replace(" ","")
+LoCode = LoCode_File.split(",")
 
 code = []
 location = []
-for i, v in enumerate(LoCode_File):
+for i, v in enumerate(LoCode):
     if i % 3 == 0:
         code.append(v)
     elif i % 3 == 1:
