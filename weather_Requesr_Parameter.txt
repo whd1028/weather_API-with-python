@@ -1,0 +1,10 @@
+항목명(국문)	항목명(영문)	항목크기	항목구분	샘플데이터	항목설명
+서비스키	ServiceKey	4	필수	-	공공데이터포털에서 받은 인증키
+페이지 번호	pageNo	4	옵션	1	페이지번호 Default : 1
+한 페이지 결과 수	numOfRows	4	옵션	10	한 페이지 결과 수 Default : 10
+응답자료형식	dataType	4	옵션	XML	요청자료형식(XML/JSON) Default : XML
+자료 코드	dataCd	4	필수	ASOS	자료 분류 코드(ASOS)
+날짜 코드	dateCd	3	필수	DAY	날짜 분류 코드(DAY)
+시작일	startDt	8	필수	20100101	조회 기간 시작일(YYYYMMDD)
+종료일	endDt	8	필수	20100601	조회 기간 종료일(YYYYMMDD) (전일(D-1)까지 제공)
+지점 번호	stnIds	3	필수	108	종관기상관측 지점 번호 (활용가이드 하단 첨부 참조)
