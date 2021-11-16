@@ -1,3 +1,6 @@
+# OpenAPI를 이용한 프로젝트
+# 날씨에 따른 교통량 (서울)
+
 # import urllib
 import urllib.request
 from bs4 import BeautifulSoup
@@ -5,6 +8,7 @@ import pandas as pd
 
 
 """
+날씨 정보 API
 요청변수(Request Parameter)
 
 항목명(국문)	항목명(영문)	항목크기	항목구분	샘플데이터	항목설명
@@ -19,35 +23,59 @@ import pandas as pd
 지점 번호	    stnIds	        3	        필수	   108	        종관기상관측 지점 번호 (활용가이드 하단 첨부 참조)
 """
 
-urlParaInfo = pd.read_table('OpenAPI_Project\weather_Requesr_Parameter.txt', sep='\t+')
-print(urlParaInfo[["항목명(국문)","항목명(영문)","항목구분"]])
+url_weather_ParaInfo = pd.read_table('OpenAPI_Project\weather_Requesr_Parameter.txt', sep='\t+')
+# print(url_weather_ParaInfo[["항목명(국문)","항목명(영문)","항목구분"]])
+url_car_ResponseInfo = pd.read_table('OpenAPI_Project\weather_Response_Element.txt', sep='\t+')
+# print(url_car_ResponseInfo[["항목명(국문)","항목명(영문)","항목구분"]])
 
-urlResponseInfo = pd.read_table('OpenAPI_Project\weather_Response_Element.txt', sep='\t+')
-print(urlResponseInfo[["항목명(국문)","항목명(영문)","항목구분"]])
+# 지역별 기상관측소 코드 파일처리
+# file = open("OpenAPI_Project\LocationCode.txt",'r',encoding='utf-8')
+# LoCode_File = file.read()
+# LoCode_File = LoCode_File.replace("\n\n",",")
+# LoCode_File = LoCode_File.replace("\n","")
+# LoCode_File = LoCode_File.replace(" ","")
+# LoCode = LoCode_File.split(",")
+# code = []
+# location = []
+# for i, v in enumerate(LoCode):
+#     if i % 3 == 0:
+#         code.append(v)
+#     elif i % 3 == 1:
+#         location.append(v)
+# LocationCode = dict(zip(location,code))
+# print(f"LocationCode = {LocationCode}")
+# file.close()
 
-file = open("OpenAPI_Project\LocationCode.txt",'r',encoding='utf-8')
-LoCode_File = file.read()
-LoCode_File = LoCode_File.replace("\n\n",",")
-LoCode_File = LoCode_File.replace("\n","")
-LoCode_File = LoCode_File.replace(" ","")
-LoCode = LoCode_File.split(",")
+"""
+교통량 API
+요청인자
+변수명	    타입	        변수설명	    값설명
+KEY	        String(필수)	인증키	        OpenAPI 에서 발급된 인증키
+TYPE	    String(필수)	요청파일타입	xml파일 : xmlf, 엑셀파일 : xls, json파일 : json
+SERVICE	    String(필수)	서비스명	    VolInfo
+START_INDEX	INTEGER(필수)	요청시작위치	정수 입력 (페이징 시작번호 입니다 : 데이터 행 시작번호)
+END_INDEX	INTEGER(필수)	요청종료위치	정수 입력 (페이징 끝번호 입니다 : 데이터 행 끝번호)
+SPOT_NUM	STRING(필수)	지점번호	
+YMD	        STRING(필수)	년월일      	YYYYMMDD
+HH	        STRING(필수)	시간	        HH
+"""
 
-code = []
-location = []
-for i, v in enumerate(LoCode):
-    if i % 3 == 0:
-        code.append(v)
-    elif i % 3 == 1:
-        location.append(v)
-LocationCode = dict(zip(location,code))
-print(f"LocationCode = {LocationCode}")
-file.close()
+"""
+교통지점 API
+요청인자
+변수명	    타입	        변수설명	    값설명
+KEY	        String(필수)	인증키	        OpenAPI 에서 발급된 인증키
+TYPE	    String(필수)	요청파일타입	xml파일 : xmlf, 엑셀파일 : xls, json파일 : json
+SERVICE	    String(필수)	서비스명	    SpotInfo
+START_INDEX	INTEGER(필수)	요청시작위치	정수 입력 (페이징 시작번호 입니다 : 데이터 행 시작번호)
+END_INDEX	INTEGER(필수)	요청종료위치	정수 입력 (페이징 끝번호 입니다 : 데이터 행 끝번호)
+"""
 
-url = 'http://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList'
-serviceKey = 'alWF7jEKCtEPNyg65f4jcsYeQJp2MZlPNTOd8SNy9GW8%2FqptIPRBcFjfkTpxWMMf%2BKU9awopinM6DhePTTLoYw%3D%3D'
 
-def Collect(stnIds, startDt, endDt, dataCd="ASOS"):
-    qeury_str = f"{url}?serviceKey={serviceKey}&dataCd={dataCd}&dateCd=DAY&startDt={startDt}&endDt={endDt}&stnIds={stnIds}"
+def CollectWeather(startDt, endDt, stnIds=108, dataCd="ASOS"):
+    url_weather = 'http://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList'
+    serviceKey_weather = 'alWF7jEKCtEPNyg65f4jcsYeQJp2MZlPNTOd8SNy9GW8%2FqptIPRBcFjfkTpxWMMf%2BKU9awopinM6DhePTTLoYw%3D%3D'
+    qeury_str = f"{url_weather}?serviceKey={serviceKey_weather}&dataCd={dataCd}&dateCd=DAY&startDt={startDt}&endDt={endDt}&stnIds={stnIds}"
     request = urllib.request.Request(qeury_str)
     response = urllib.request.urlopen(request)
 
@@ -56,23 +84,15 @@ def Collect(stnIds, startDt, endDt, dataCd="ASOS"):
     for item in items:
         pass
 
+def CollectCar(TYPE,SERVICE,START_INDEX,END_INDEX,SPOT_NUM,YMD,HH):
+    # 교통량 조회 형식 : {url}/{인증키}/{요청파일타입}/{서비스명}/{요청시작위치}/{요청종료위치}/{지점번호}/{년월일}/{시간}
+    # 지점 조회 형식 : {url}/{인증키}/{요청파일타입}/{서비스명}/{페이지시작}/{페이지종료}
+    url_car = 'http://openapi.seoul.go.kr:8088'
+    serviceKey_car = '58795171617a6d6638327a4c504e77'
+    qeurt_str = f"{url_car}/{serviceKey_car}/"
     
-# location_dic = {"서울" : 108, "인천" : 112, "태백" : 216, "세종" : 239, "대전" : 133, "부산" : 159}
-# print(location_dic.keys())
-# location_name =  "서울" # input("검색 지역 : ")
-# stnIds = location_dic[location_name]
-# startDt = 20190101 #input("시작날짜 : ")
-# endDt = 20190601 #input("종료날짜 : ")
-# Collect(stnIds, startDt, endDt)
 
 
-
-
-
-# qeury_str = f"{url}?serviceKey={serviceKey}&pageNo=1&numOfRows=10&dataType=XML&dataCd=ASOS&dateCd=DAY&startDt=20100101&endDt=20100601&stnIds=108"
-# # print(qeury_str)
-# request = urllib.request.Request(qeury_str)
-# response = urllib.request.urlopen(request)
 
 # # print(response)
 # html = BeautifulSoup(response,'html.parser')
