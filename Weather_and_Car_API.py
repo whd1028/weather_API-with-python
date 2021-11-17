@@ -75,8 +75,8 @@ END_INDEX	INTEGER(필수)	요청종료위치	정수 입력 (페이징 끝번호 
 def CollectWeather(startDt, endDt, stnIds=108, dataCd="ASOS"):
     url_weather = 'http://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList'
     serviceKey_weather = 'alWF7jEKCtEPNyg65f4jcsYeQJp2MZlPNTOd8SNy9GW8%2FqptIPRBcFjfkTpxWMMf%2BKU9awopinM6DhePTTLoYw%3D%3D'
-    qeury_str = f"{url_weather}?serviceKey={serviceKey_weather}&dataCd={dataCd}&dateCd=DAY&startDt={startDt}&endDt={endDt}&stnIds={stnIds}"
-    request = urllib.request.Request(qeury_str)
+    query_str = f"{url_weather}?serviceKey={serviceKey_weather}&dataCd={dataCd}&dateCd=DAY&startDt={startDt}&endDt={endDt}&stnIds={stnIds}"
+    request = urllib.request.Request(query_str)
     response = urllib.request.urlopen(request)
 
     html = BeautifulSoup(response,'html.parser')
@@ -84,15 +84,45 @@ def CollectWeather(startDt, endDt, stnIds=108, dataCd="ASOS"):
     for item in items:
         pass
 
-def CollectCar(TYPE,SERVICE,START_INDEX,END_INDEX,SPOT_NUM,YMD,HH):
+def CollectTraffic(START_INDEX,END_INDEX,YMD,HH):
     # 교통량 조회 형식 : {url}/{인증키}/{요청파일타입}/{서비스명}/{요청시작위치}/{요청종료위치}/{지점번호}/{년월일}/{시간}
+    # 출력값 : SPOT_NUM : 지점번호,YMD : 년월일,HH:시간,IO_TYPE : 유입유출 구분,LANE_NUM : 차로번호,VOL : 교통량
+    url_car = 'http://openapi.seoul.go.kr:8088'
+    serviceKey_car = '58795171617a6d6638327a4c504e77'
+    spot_dic = CollectSpot()
+    spot_num_list = spot_dic.keys()
+    for spot_num in spot_num_list:
+        query_traffic = f"{url_car}/{serviceKey_car}/xml/SpotInfo/{START_INDEX}/{END_INDEX}/{spot_num}/{YMD}/{HH}"
+        request = urllib.request.Request(query_traffic)
+        response = urllib.request.urlopen(request)
+        rescode = response.getcode()
+        if rescode != 200:
+            print("err : ",rescode)
+            
+        html = BeautifulSoup(response,'html.parser')
+        rows = html.find_all('row')
+        for row in rows:
+            print(row)
+
+
+def CollectSpot():
     # 지점 조회 형식 : {url}/{인증키}/{요청파일타입}/{서비스명}/{페이지시작}/{페이지종료}
     url_car = 'http://openapi.seoul.go.kr:8088'
     serviceKey_car = '58795171617a6d6638327a4c504e77'
-    qeurt_str = f"{url_car}/{serviceKey_car}/"
-    
+    query_spot = f"{url_car}/{serviceKey_car}/xml/SpotInfo/0/500"
 
+    request = urllib.request.Request(query_spot)
+    response = urllib.request.urlopen(request)
 
+    html = BeautifulSoup(response,'html.parser')
+    rows = html.find_all('row')
+    spot_dic = {}
+    for row in rows:
+        spot_dic[row.spot_num.text] = row.spot_nm.text
+    # print(spot_dic.keys())
+    return spot_dic
+
+CollectTraffic(1,5,20100101,12)
 
 # # print(response)
 # html = BeautifulSoup(response,'html.parser')
