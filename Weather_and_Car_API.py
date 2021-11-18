@@ -92,17 +92,26 @@ def CollectTraffic(START_INDEX,END_INDEX,YMD,HH):
     spot_dic = CollectSpot()
     spot_num_list = spot_dic.keys()
     for spot_num in spot_num_list:
-        query_traffic = f"{url_car}/{serviceKey_car}/xml/SpotInfo/{START_INDEX}/{END_INDEX}/{spot_num}/{YMD}/{HH}"
+        query_traffic = f"{url_car}/{serviceKey_car}/xml/VolInfo/{START_INDEX}/{END_INDEX}/{spot_num}/{YMD}/{HH}"
         request = urllib.request.Request(query_traffic)
         response = urllib.request.urlopen(request)
-        rescode = response.getcode()
-        if rescode != 200:
-            print("err : ",rescode)
-            
+
+        # rescode = response.getcode()
+        # if rescode != 200:
+        #     print("err : ",rescode)
+        
+        
         html = BeautifulSoup(response,'html.parser')
+
+        result = html.find('result')
+        if result.code.text != 'INFO=000':
+            print(f"err : {result.message.text}")
+            break
+
         rows = html.find_all('row')
         for row in rows:
-            print(row)
+            pass
+                
 
 
 def CollectSpot():
