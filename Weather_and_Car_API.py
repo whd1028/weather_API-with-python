@@ -23,12 +23,12 @@ import pandas as pd
 지점 번호	    stnIds	        3	        필수	   108	        종관기상관측 지점 번호 (활용가이드 하단 첨부 참조)
 """
 
-url_weather_ParaInfo = pd.read_table('OpenAPI_Project\weather_Requesr_Parameter.txt', sep='\t+')
+# url_weather_ParaInfo = pd.read_table('OpenAPI_Project\weather_Requesr_Parameter.txt', sep='\t+')
 # print(url_weather_ParaInfo[["항목명(국문)","항목명(영문)","항목구분"]])
-url_car_ResponseInfo = pd.read_table('OpenAPI_Project\weather_Response_Element.txt', sep='\t+')
+# url_car_ResponseInfo = pd.read_table('OpenAPI_Project\weather_Response_Element.txt', sep='\t+')
 # print(url_car_ResponseInfo[["항목명(국문)","항목명(영문)","항목구분"]])
 
-# 지역별 기상관측소 코드 파일처리
+# 지역별 기상관측소 코드 파일처리 => 서울지역만 알아보자....
 # file = open("OpenAPI_Project\LocationCode.txt",'r',encoding='utf-8')
 # LoCode_File = file.read()
 # LoCode_File = LoCode_File.replace("\n\n",",")
@@ -48,20 +48,35 @@ url_car_ResponseInfo = pd.read_table('OpenAPI_Project\weather_Response_Element.t
 
 """
 교통량 API
+
 요청인자
 변수명	    타입	        변수설명	    값설명
 KEY	        String(필수)	인증키	        OpenAPI 에서 발급된 인증키
 TYPE	    String(필수)	요청파일타입	xml파일 : xmlf, 엑셀파일 : xls, json파일 : json
 SERVICE	    String(필수)	서비스명	    VolInfo
 START_INDEX	INTEGER(필수)	요청시작위치	정수 입력 (페이징 시작번호 입니다 : 데이터 행 시작번호)
-END_INDEX	INTEGER(필수)	요청종료위치	정수 입력 (페이징 끝번호 입니다 : 데이터 행 끝번호)
+END_INDEX	INTEGER(필수)	요청종료위치	정수 입력 (페이징 끝번호 입니다 : 데이터 행 끝번호), 한번호출시 최대 1000건까지 호출 가능합니다.
 SPOT_NUM	STRING(필수)	지점번호	
 YMD	        STRING(필수)	년월일      	YYYYMMDD
 HH	        STRING(필수)	시간	        HH
+
+
+출력값
+No	    출력명	            출력설명
+공통	list_total_count	총 데이터 건수 (정상조회 시 출력됨)
+공통	RESULT.CODE	        요청결과 코드 (하단 메세지설명 참고)
+공통	RESULT.MESSAGE	    요청결과 메시지 (하단 메세지설명 참고)
+1	    SPOT_NUM	        지점번호
+2	    YMD	                년월일
+3	    HH	                시간
+4	    IO_TYPE	            유입유출 구분
+5	    LANE_NUM	        차로번호
+6	    VOL	                교통량
 """
 
 """
 교통지점 API
+
 요청인자
 변수명	    타입	        변수설명	    값설명
 KEY	        String(필수)	인증키	        OpenAPI 에서 발급된 인증키
@@ -69,6 +84,17 @@ TYPE	    String(필수)	요청파일타입	xml파일 : xmlf, 엑셀파일 : xls,
 SERVICE	    String(필수)	서비스명	    SpotInfo
 START_INDEX	INTEGER(필수)	요청시작위치	정수 입력 (페이징 시작번호 입니다 : 데이터 행 시작번호)
 END_INDEX	INTEGER(필수)	요청종료위치	정수 입력 (페이징 끝번호 입니다 : 데이터 행 끝번호)
+
+
+출력값
+No	    출력명	            출력설명
+공통	list_total_count	총 데이터 건수 (정상조회 시 출력됨)
+공통	RESULT.CODE	        요청결과 코드 (하단 메세지설명 참고)
+공통	RESULT.MESSAGE  	요청결과 메시지 (하단 메세지설명 참고)
+1	    SPOT_NUM	        지점 번호
+2	    SPOT_NM	            지점명칭
+3	    GRS80TM_X	        TM X 좌표
+4	    GRS80TM_Y	        TM Y 좌표
 """
 
 
@@ -84,7 +110,7 @@ def CollectWeather(startDt, endDt, stnIds=108, dataCd="ASOS"):
     for item in items:
         pass
 
-def CollectTraffic(START_INDEX,END_INDEX,YMD,HH):
+def CollectTraffic_AllSpot_in_seoul(START_INDEX,END_INDEX,YMD,HH):
     # 교통량 조회 형식 : {url}/{인증키}/{요청파일타입}/{서비스명}/{요청시작위치}/{요청종료위치}/{지점번호}/{년월일}/{시간}
     # 출력값 : SPOT_NUM : 지점번호,YMD : 년월일,HH:시간,IO_TYPE : 유입유출 구분,LANE_NUM : 차로번호,VOL : 교통량
     url_car = 'http://openapi.seoul.go.kr:8088'
@@ -92,25 +118,30 @@ def CollectTraffic(START_INDEX,END_INDEX,YMD,HH):
     spot_dic = CollectSpot()
     spot_num_list = spot_dic.keys()
     for spot_num in spot_num_list:
-        query_traffic = f"{url_car}/{serviceKey_car}/xml/VolInfo/{START_INDEX}/{END_INDEX}/{spot_num}/{YMD}/{HH}"
-        request = urllib.request.Request(query_traffic)
-        response = urllib.request.urlopen(request)
+        # query_traffic = f"{url_car}/{serviceKey_car}/xml/VolInfo/{START_INDEX}/{END_INDEX}/{spot_num}/{YMD}/{HH}"
+        query_traffic_day = f"{url_car}/{serviceKey_car}/xml/VolInfo/{START_INDEX}/{END_INDEX}/{spot_num}/{YMD}/"
+        query_traffic = DayTraffic(query_traffic_day)
+
+        # request = urllib.request.Request(query_traffic)
+        # response = urllib.request.urlopen(request)
 
         # rescode = response.getcode()
         # if rescode != 200:
         #     print("err : ",rescode)
-        
-        
-        html = BeautifulSoup(response,'html.parser')
+              
+        # html = BeautifulSoup(response,'html.parser')
 
-        result = html.find('result')
-        if result.code.text != 'INFO=000':
-            print(f"err : {result.message.text}")
-            break
+        # result = html.find('result')
+        # if result.code.text != 'INFO-000':
+        #     print(f"err : {result.message.text}")
+        #     break
+        # else:
+        #     print(result.message.text)
+        #     rows = html.find_all('row')
+        #     for row in rows:
+        #         print(row.ymd.text)
+        #         print(row.vol.text)
 
-        rows = html.find_all('row')
-        for row in rows:
-            pass
                 
 
 
@@ -131,7 +162,55 @@ def CollectSpot():
     # print(spot_dic.keys())
     return spot_dic
 
-CollectTraffic(1,5,20100101,12)
+
+def DayTraffic(query_traffic_day):
+    trattic_day = 0
+    for i in range(1,24):
+        query_traffic = query_traffic_day + str(i).zfill(2)
+        request = urllib.request.Request(query_traffic)
+        response = urllib.request.urlopen(request)
+        html = BeautifulSoup(response,'html.parser')
+
+        result = html.find('result')
+        if result.code.text != 'INFO-000':
+            print(f"err : {result.message.text}")
+            break
+        else:
+            print(result.message.text)
+            rows = html.find_all('row')
+            for row in rows:
+                row
+
+
+
+
+
+# CollectTraffic_AllSpot_in_seoul(1,100,20180101,"23")
+# print(len(CollectSpot()))
+
+
+# 데이터가 존재하는 년도 확인 => 중간에 없는 데이터 존재함 => (2006 ~ 현재)동안 모든 월,일,시간에 null값 확인해야하나?
+url_car = 'http://openapi.seoul.go.kr:8088'
+serviceKey_car = '58795171617a6d6638327a4c504e77'
+# for year in range(2000,2022):
+#     query_traffic = f"{url_car}/{serviceKey_car}/xml/VolInfo/1/5/A-01/{str(year)+'0101'}/00"
+#     request = urllib.request.Request(query_traffic)
+#     response = urllib.request.urlopen(request)
+
+#     # rescode = response.getcode()
+#     # if rescode != 200:
+#     #     print("err : ",rescode)
+    
+#     html = BeautifulSoup(response,'html.parser')
+
+#     result = html.find('result')
+#     if result.code.text != 'INFO-000':
+#         print(f"err : {year}년1월1일에 {result.message.text}")
+#     else:
+#         print(result.message.text)
+
+
+
 
 # # print(response)
 # html = BeautifulSoup(response,'html.parser')
