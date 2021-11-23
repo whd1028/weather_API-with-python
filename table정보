@@ -1,11 +1,19 @@
 [CARTRAFFIC]   # null값까지 표현하기위한 테이블
-col_Name    data_type           Null_Able   col_Id
-SPOT_NUM	VARCHAR2(20 BYTE)	No		    1	
+(col_Name)    (data_type)  (Null_Able)   col_Id
+SPOT_NUM	  VARCHAR2(20 BYTE)	No		    1	
 YMD	        VARCHAR2(20 BYTE)	No		    2	
 HH	        VARCHAR2(20 BYTE)	No		    3	
 IO_TYPE	    VARCHAR2(20 BYTE)	Yes		    4	
-LANE_NUM	NUMBER          	Yes		    5	
-VOL	        NUMBER	            Yes		    6	
+LANE_NUM	  NUMBER          	Yes		    5	
+VOL	        NUMBER	          Yes		    6	
 
   # 우려되는 점 : 한 지점에 부분적으로 자료가 없는 경우도 있나?
   # 한 도로에 자료가 없는 차선이 존재할 수 있나? 일단은 없다는 가정하에 진행한다.
+
+[WEATHER]
+(col_Name)    (data_type)  (Null_Able)
+TM	      VARCHAR2(20 BYTE)	No		    1	시간
+SUMRN*    VARCHAR2(20 BYTE)	Yes		    2	일 강수량(mm)*
+DDMEFS  	VARCHAR2(20 BYTE)	Yes		    3	일최심신적설(cm)
+DDMES*    VARCHAR2(20 BYTE)	Yes		    4	일 최심적설(cm)*
+SUMFOGDUR	VARCHAR2(20 BYTE)	Yes		    5	안개 계속 시간(hr)

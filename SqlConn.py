@@ -5,8 +5,8 @@ import os
 class SqlConn:
     LOCATION = r"C:\instantclient_19_12"
     os.environ["PATH"] = LOCATION + ";" + os.environ["PATH"]  #환경변수 등록
-    username = "pjw"
-    passwd ="pjw"
+    username = "miniproject"
+    passwd ="0000"
     connection = cx_Oracle.connect(username, passwd, 'localhost:1521/xe')
 
     @staticmethod
