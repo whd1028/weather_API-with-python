@@ -21,7 +21,6 @@ cursor.execute(query)
 
 # 2.
 a = ('test2','test2','test2','test2',None,None)
-print(query)
 cursor.execute("INSERT INTO cartraffic VALUES (:1,:2,:3,:4,:5,:6)",a)
 
 # 3. 출처 = {https://stackoverflow.com/questions/5507948/how-can-i-insert-null-data-into-mysql-database-with-python}
